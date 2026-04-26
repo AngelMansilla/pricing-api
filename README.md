@@ -18,6 +18,7 @@ The project follows a simple hexagonal architecture:
 - Domain: pure Java business model and exception.
 - Application: input/output ports and the use case that applies the pricing priority rule.
 - Infrastructure: REST inbound adapter and JPA persistence outbound adapter.
+
 Package responsibilities:
 - `application/port/in`: use case contracts.
 - `application/port/out`: dependencies required by the application.
