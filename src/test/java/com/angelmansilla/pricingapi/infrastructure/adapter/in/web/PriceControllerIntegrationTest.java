@@ -52,6 +52,45 @@ class PriceControllerIntegrationTest {
                 .andExpect(jsonPath("$.message").value("No applicable price found for the given criteria"));
     }
 
+    @Test
+    void shouldReturnBadRequestWhenApplicationDateIsMissing() throws Exception {
+        mockMvc.perform(get("/api/prices")
+                .param("productId", PRODUCT_ID)
+                .param("brandId", BRAND_ID))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("applicationDate is required"));
+    }
+
+    @Test
+    void shouldReturnBadRequestWhenApplicationDateHasInvalidFormat() throws Exception {
+        mockMvc.perform(get("/api/prices")
+                .param("applicationDate", "invalid-date")
+                .param("productId", PRODUCT_ID)
+                .param("brandId", BRAND_ID))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message")
+                        .value("applicationDate must use ISO date-time format, for example 2020-06-14T10:00:00"));
+    }
+
+    @Test
+    void shouldReturnBadRequestWhenProductIdIsInvalid() throws Exception {
+        mockMvc.perform(get("/api/prices")
+                .param("applicationDate", "2020-06-14T10:00:00")
+                .param("productId", "invalid-product")
+                .param("brandId", BRAND_ID))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("productId must be a valid number"));
+    }
+
+    @Test
+    void shouldReturnBadRequestWhenBrandIdIsMissing() throws Exception {
+        mockMvc.perform(get("/api/prices")
+                .param("applicationDate", "2020-06-14T10:00:00")
+                .param("productId", PRODUCT_ID))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("brandId is required"));
+    }
+
     private void assertPrice(String applicationDate, int expectedPriceList, double expectedPrice) throws Exception {
         mockMvc.perform(get("/api/prices")
                 .param("applicationDate", applicationDate)

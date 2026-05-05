@@ -46,6 +46,14 @@ Example response:
 }
 ```
 When no applicable price exists, the API returns `404 Not Found`.
+When a required query parameter is missing or has an invalid format, the API returns `400 Bad Request`.
+
+Example validation error response:
+```json
+{
+  "message": "applicationDate is required"
+}
+```
 
 ## How to Run
 ```bash
