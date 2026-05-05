@@ -14,4 +14,10 @@ public class GlobalExceptionHandler {
     public ErrorResponse handlePriceNotFound(PriceNotFoundException exception) {
         return new ErrorResponse(exception.getMessage());
     }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleInvalidRequest(IllegalArgumentException exception) {
+        return new ErrorResponse(exception.getMessage());
+    }
 }

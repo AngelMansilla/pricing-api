@@ -4,7 +4,8 @@ import com.angelmansilla.pricingapi.application.port.in.FindApplicablePriceUseCa
 import com.angelmansilla.pricingapi.domain.model.Price;
 import com.angelmansilla.pricingapi.infrastructure.adapter.in.web.dto.PriceResponse;
 import java.time.LocalDateTime;
-import org.springframework.format.annotation.DateTimeFormat;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -21,11 +22,43 @@ public class PriceController {
 
     @GetMapping
     public PriceResponse findApplicablePrice(
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime applicationDate,
-            @RequestParam Long productId,
-            @RequestParam Long brandId) {
-        Price price = findApplicablePriceUseCase.findApplicablePrice(applicationDate, productId, brandId);
+            @RequestParam(required = false) String applicationDate,
+            @RequestParam(required = false) String productId,
+            @RequestParam(required = false) String brandId) {
+        LocalDateTime parsedApplicationDate = parseApplicationDate(applicationDate);
+        Long parsedProductId = parseLong(productId, "productId");
+        Long parsedBrandId = parseLong(brandId, "brandId");
+
+        Price price = findApplicablePriceUseCase.findApplicablePrice(
+                parsedApplicationDate,
+                parsedProductId,
+                parsedBrandId);
         return toResponse(price);
+    }
+
+    private LocalDateTime parseApplicationDate(String applicationDate) {
+        if (applicationDate == null || applicationDate.isBlank()) {
+            throw new IllegalArgumentException("applicationDate is required");
+        }
+
+        try {
+            return LocalDateTime.parse(applicationDate, DateTimeFormatter.ISO_DATE_TIME);
+        } catch (DateTimeParseException exception) {
+            throw new IllegalArgumentException(
+                    "applicationDate must use ISO date-time format, for example 2020-06-14T10:00:00");
+        }
+    }
+
+    private Long parseLong(String value, String parameterName) {
+        if (value == null || value.isBlank()) {
+            throw new IllegalArgumentException(parameterName + " is required");
+        }
+
+        try {
+            return Long.parseLong(value);
+        } catch (NumberFormatException exception) {
+            throw new IllegalArgumentException(parameterName + " must be a valid number");
+        }
     }
 
     private PriceResponse toResponse(Price price) {
